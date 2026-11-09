@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ChurnGuard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-6">
+  <div class="bg-white shadow-md rounded-lg p-8 w-full max-w-lg">
+    <h1 class="text-2xl font-bold mb-6">ChurnGuard — Churn Predictor</h1>
+
+    <form id="churn-form" class="space-y-4">
+      <div>
+        <label class="block text-sm font-medium mb-1">Tenure (months)</label>
+        <input type="number" id="Tenure" class="w-full border rounded p-2" value="12" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Warehouse to Home (km)</label>
+        <input type="number" id="WarehouseToHome" class="w-full border rounded p-2" value="15" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Number of Devices Registered</label>
+        <input type="number" id="NumberOfDeviceRegistered" class="w-full border rounded p-2" value="3" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Satisfaction Score (1-5)</label>
+        <input type="number" id="SatisfactionScore" class="w-full border rounded p-2" value="3" min="1" max="5" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Number of Addresses</label>
+        <input type="number" id="NumberOfAddress" class="w-full border rounded p-2" value="2" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Has Complained?</label>
+        <select id="Complain" class="w-full border rounded p-2">
+          <option value="0">No</option>
+          <option value="1">Yes</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Days Since Last Order</label>
+        <input type="number" id="DaySinceLastOrder" class="w-full border rounded p-2" value="5" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Cashback Amount</label>
+        <input type="number" id="CashbackAmount" class="w-full border rounded p-2" value="150" required>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Preferred Order Category</label>
+        <select id="PreferedOrderCat" class="w-full border rounded p-2">
+          <option value="Fashion">Fashion</option>
+          <option value="Grocery">Grocery</option>
+          <option value="Laptop & Accessory">Laptop & Accessory</option>
+          <option value="Mobile">Mobile</option>
+          <option value="Mobile Phone">Mobile Phone</option>
+          <option value="Others">Others</option>
+        </select>
+      </div>
+      <div>
+        <label class="block text-sm font-medium mb-1">Marital Status</label>
+        <select id="MaritalStatus" class="w-full border rounded p-2">
+          <option value="Divorced">Divorced</option>
+          <option value="Married">Married</option>
+          <option value="Single">Single</option>
+        </select>
+      </div>
+
+      <button type="submit" class="w-full bg-blue-600 text-white font-medium py-2 rounded hover:bg-blue-700">
+        Predict Churn Risk
+      </button>
+    </form>
+
+    <div id="result" class="mt-6 text-center text-lg font-semibold"></div>
+  </div>
+
+  <script>
+    document.getElementById('churn-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const preferedCat = document.getElementById('PreferedOrderCat').value;
+      const maritalStatus = document.getElementById('MaritalStatus').value;
+
+      const payload = {
+        Tenure: Number(document.getElementById('Tenure').value),
+        WarehouseToHome: Number(document.getElementById('WarehouseToHome').value),
+        NumberOfDeviceRegistered: Number(document.getElementById('NumberOfDeviceRegistered').value),
+        SatisfactionScore: Number(document.getElementById('SatisfactionScore').value),
+        NumberOfAddress: Number(document.getElementById('NumberOfAddress').value),
+        Complain: Number(document.getElementById('Complain').value),
+        DaySinceLastOrder: Number(document.getElementById('DaySinceLastOrder').value),
+        CashbackAmount: Number(document.getElementById('CashbackAmount').value),
+        'PreferedOrderCat_Grocery': preferedCat === 'Grocery',
+        'PreferedOrderCat_Laptop & Accessory': preferedCat === 'Laptop & Accessory',
+        'PreferedOrderCat_Mobile': preferedCat === 'Mobile',
+        'PreferedOrderCat_Mobile Phone': preferedCat === 'Mobile Phone',
+        'PreferedOrderCat_Others': preferedCat === 'Others',
+        'MaritalStatus_Married': maritalStatus === 'Married',
+        'MaritalStatus_Single': maritalStatus === 'Single'
+      };
+
+      const response = await fetch('/predict', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+      document.getElementById('result').innerText = `Churn Probability: ${data.churn_probability}%`;
+    });
+  </script>
+
+  <script>
+  document.querySelectorAll('input[type=number]').forEach(function(input) {
+    input.addEventListener('wheel', function(e) {
+      this.blur();
+    });
+  });
+</script>
+</body>
+</html>
